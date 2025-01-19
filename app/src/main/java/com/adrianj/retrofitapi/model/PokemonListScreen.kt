@@ -15,14 +15,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.adrianj.retrofitapi.R
 import com.adrianj.retrofitapi.model.Pokemon
 import com.adrianj.retrofitapi.viewmodel.PokemonViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PokemonListScreen(viewModel: PokemonViewModel = viewModel()) {
+fun PokemonListScreen() {
+    val viewModel = PokemonViewModel()
     val pokemonList by viewModel.pokemonList.collectAsState()
 
     Scaffold(
