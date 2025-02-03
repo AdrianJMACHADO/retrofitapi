@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1021791440592",
+    "project_id": "retrofitapi-c0e8e",
+    "storage_bucket": "retrofitapi-c0e8e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1021791440592:android:474b04cae53b27107a98d5",
+        "android_client_info": {
+          "package_name": "com.adrianj.retrofitapi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApCFltlb5SB7AuWKBP6iYmzjPIay5QSDM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
