@@ -119,8 +119,8 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_firebase),
-                contentDescription = "Firebase",
+                painter = painterResource(id = R.drawable.pokeball),
+                contentDescription = "pokeball",
                 modifier = Modifier.size(100.dp)
             )
             Spacer(modifier = Modifier.height(10.dp))
