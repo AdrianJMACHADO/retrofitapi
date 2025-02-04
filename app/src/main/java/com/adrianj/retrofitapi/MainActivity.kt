@@ -9,7 +9,6 @@ import com.adrianj.retrofitapi.navegacion.Navegacion
 import com.adrianj.retrofitapi.ui.PokemonListScreen
 import com.adrianj.retrofitapi.ui.theme.RetrofitapiTheme
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.analytics.ktx.analytics
 
 
 class MainActivity : ComponentActivity() {
@@ -17,7 +16,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        Firebase.analytics
         setContent {
             RetrofitapiTheme {
                 Navegacion(auth)

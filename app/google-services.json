@@ -12,7 +12,20 @@
           "package_name": "com.adrianj.retrofitapi"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1021791440592-jhjc2vn9sh72o56obl51kfpeb7oi3cik.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.adrianj.retrofitapi",
+            "certificate_hash": "fee128b20f696a8031cff175d66f330911faf1fd"
+          }
+        },
+        {
+          "client_id": "1021791440592-b8sglkscnv8pvhphl8ohd77gcbvq5tef.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyApCFltlb5SB7AuWKBP6iYmzjPIay5QSDM"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1021791440592-b8sglkscnv8pvhphl8ohd77gcbvq5tef.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
