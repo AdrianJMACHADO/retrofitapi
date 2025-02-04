@@ -125,7 +125,7 @@ fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "Firebase Android",
+                text = "PokeApi",
                 style = TextStyle(fontSize = 30.sp)
             )
             Spacer(modifier = Modifier.height(30.dp))
