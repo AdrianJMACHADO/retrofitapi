@@ -31,7 +31,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.adrianj.retrofitapi.R
 import com.adrianj.retrofitapi.data.AuthManager
-import com.adrianj.retrofitapi.model.Pokemon
+import com.adrianj.retrofitapi.model.fuerauso.Pokemon
 import com.adrianj.retrofitapi.viewmodel.PokemonViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

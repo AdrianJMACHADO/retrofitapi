@@ -1,5 +1,6 @@
 package com.adrianj.retrofitapi.model
 
+import com.adrianj.retrofitapi.model.fuerauso.PokeApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

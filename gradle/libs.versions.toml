@@ -42,6 +42,7 @@ firebase-bom = { group ="com.google.firebase", name = "firebase-bom", version.re
 firebase-analytics = {group = "com.google.firebase", name = "firebase-analytics"}
 firebase-auth = {group = "com.google.firebase", name = "firebase-auth-ktx"}
 play-services = {group = "com.google.android.gms", name = "play-services-auth", version = "21.3.0"}
+firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,4 +1,4 @@
-package com.adrianj.retrofitapi.model
+package com.adrianj.retrofitapi.model.fuerauso
 
 import retrofit2.http.GET
 

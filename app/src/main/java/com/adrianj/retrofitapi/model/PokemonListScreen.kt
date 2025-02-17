@@ -16,7 +16,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.adrianj.retrofitapi.R
-import com.adrianj.retrofitapi.model.Pokemon
+import com.adrianj.retrofitapi.model.fuerauso.Pokemon
 import com.adrianj.retrofitapi.viewmodel.PokemonViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

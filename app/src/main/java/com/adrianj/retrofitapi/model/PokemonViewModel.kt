@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import com.adrianj.retrofitapi.model.Pokemon
+import com.adrianj.retrofitapi.model.fuerauso.Pokemon
 import com.adrianj.retrofitapi.model.PokeRemoteConnection
 
 class PokemonViewModel : ViewModel() {
