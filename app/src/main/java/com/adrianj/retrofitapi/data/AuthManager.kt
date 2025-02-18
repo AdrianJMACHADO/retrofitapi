@@ -72,7 +72,7 @@ class AuthManager(private val context: Context) {
             val account = task.getResult(ApiException::class.java)
             AuthRes.Success(account)
         } catch (e: ApiException) {
-            AuthRes.Error(e.message ?: "Error al iniciar sesión con Google")
+             AuthRes.Error(e.message ?: "Error al iniciar sesión con Google")
         }
     }
 
