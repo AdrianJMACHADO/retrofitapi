@@ -14,11 +14,27 @@
       },
       "oauth_client": [
         {
+          "client_id": "1021791440592-h99ins6ot31cbdc68pv27qmdn5h1oosh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.adrianj.retrofitapi",
+            "certificate_hash": "f277877126c15fe4a268ce049b245eb27c7ecdcb"
+          }
+        },
+        {
           "client_id": "1021791440592-jhjc2vn9sh72o56obl51kfpeb7oi3cik.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.adrianj.retrofitapi",
             "certificate_hash": "fee128b20f696a8031cff175d66f330911faf1fd"
+          }
+        },
+        {
+          "client_id": "1021791440592-vph0qpneu56igi9p69hnf9un0s4frtap.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.adrianj.retrofitapi",
+            "certificate_hash": "ac5c536b704752065de05f36d6fe326523405943"
           }
         },
         {

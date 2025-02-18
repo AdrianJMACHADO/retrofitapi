@@ -41,12 +41,6 @@ fun AddPokemonDialog(
     var name by remember { mutableStateOf("") }
     var tipo1 by remember { mutableStateOf("") }
     var tipo2 by remember { mutableStateOf("") }
-    var hp by remember { mutableIntStateOf(0) }
-    var atk by remember { mutableIntStateOf(0) }
-    var def by remember { mutableIntStateOf(0) }
-    var spatk by remember { mutableIntStateOf(0) }
-    var spdef by remember { mutableIntStateOf(0) }
-    var speed by remember { mutableIntStateOf(0) }
 
     val tiposPokemon = listOf(
         "Normal", "Fuego", "Agua", "Planta", "Eléctrico", "Hielo",
@@ -72,13 +66,6 @@ fun AddPokemonDialog(
                     onPokemonAdded(newPokemon)
                     name = ""
                     tipo1 = ""
-                    tipo2 = ""
-                    hp = 0
-                    atk = 0
-                    def = 0
-                    spatk = 0
-                    spdef = 0
-                    speed = 0
                 }
             ) {
                 Text("Añadir")
@@ -170,67 +157,6 @@ fun AddPokemonDialog(
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(10.dp))
-                TextField(
-                    value = hp.toString(),
-                    onValueChange = { hp = it.toIntOrNull() ?: 0 },
-                    label = { Text("Vida") },
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType =
-                        KeyboardType.Number
-                    )
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                TextField(
-                    value = atk.toString(),
-                    onValueChange = { atk = it.toIntOrNull() ?: 0 },
-                    label = { Text("Ataque") },
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType =
-                        KeyboardType.Number
-                    )
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                TextField(
-                    value = def.toString(),
-                    onValueChange = { def = it.toIntOrNull() ?: 0 },
-                    label = { Text("Defensa") },
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType =
-                        KeyboardType.Number
-                    )
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                TextField(
-                    value = spatk.toString(),
-                    onValueChange = { spatk = it.toIntOrNull() ?: 0 },
-                    label = { Text("Ataque Especial") },
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType =
-                        KeyboardType.Number
-                    )
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                TextField(
-                    value = spdef.toString(),
-                    onValueChange = { spdef = it.toIntOrNull() ?: 0 },
-                    label = { Text("Defensa Especial") },
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType =
-                        KeyboardType.Number
-                    )
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                TextField(
-                    value = speed.toString(),
-                    onValueChange = { speed = it.toIntOrNull() ?: 0 },
-                    label = { Text("Velocidad") },
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType =
-                        KeyboardType.Number
-                    )
-                )
 
             }
 

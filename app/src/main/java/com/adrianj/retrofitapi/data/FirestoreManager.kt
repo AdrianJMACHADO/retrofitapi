@@ -23,13 +23,13 @@ class FirestoreManager(auth: AuthManager, context: android.content.Context) {
             .snapshots()
             .map { qs ->
                 qs.documents.mapNotNull { ds ->
-                    ds.toObject(PokemonDB::class.java)?.let { PokamionDB ->
+                    ds.toObject(PokemonDB::class.java)?.let { PokemonDB ->
                         Pokemon(
                             id = ds.id,
-                            userId = PokamionDB.userId,
-                            name = PokamionDB.name,
-                            tipo1 = PokamionDB.tipo1,
-                            tipo2 = PokamionDB.tipo2,
+                            userId = PokemonDB.userId,
+                            name = PokemonDB.name,
+                            tipo1 = PokemonDB.tipo1,
+                            tipo2 = PokemonDB.tipo2,
                         )
                     }
                 }
