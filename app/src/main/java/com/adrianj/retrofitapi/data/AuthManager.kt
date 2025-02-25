@@ -53,7 +53,6 @@ class AuthManager(private val context: Context) {
         } catch (e: Exception) {
             AuthRes.Error(e.message ?: "Error al restablecer la contraseña")
         }
-
     }
 
     suspend fun signInAnonymously(): AuthRes<FirebaseUser?> {
@@ -64,7 +63,6 @@ class AuthManager(private val context: Context) {
             AuthRes.Error(e.message ?: "Error al iniciar sesión anónima")
         }
     }
-
 
     fun handleSignInResult(task: Task<GoogleSignInAccount>):
             AuthRes<GoogleSignInAccount?> {
@@ -99,7 +97,6 @@ class AuthManager(private val context: Context) {
         val signInIntent = googleSignInClient.signInIntent
         googleSignInLauncher.launch(signInIntent)
     }
-
 }
 
 sealed class AuthRes<out T> {

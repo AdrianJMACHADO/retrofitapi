@@ -1,4 +1,4 @@
-package com.adrianj.retrofitapi.screen
+package com.adrianj.retrofitapi.viewmodel
 
 import android.content.Context
 import android.widget.Toast

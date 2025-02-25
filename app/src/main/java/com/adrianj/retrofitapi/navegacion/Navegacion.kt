@@ -9,10 +9,8 @@ import androidx.navigation.compose.rememberNavController
 import com.adrianj.retrofitapi.data.AuthManager
 import com.adrianj.retrofitapi.data.FirestoreManager
 import com.adrianj.retrofitapi.screen.ForgotPasswordScreen
-import com.adrianj.retrofitapi.screen.HomeScreen
 import com.adrianj.retrofitapi.screen.LoginScreen
-import com.adrianj.retrofitapi.screen.SignUpScreen
-import com.adrianj.retrofitapi.screen.CharacterListScreen
+import com.adrianj.retrofitapi.viewmodel.SignUpScreen
 import com.adrianj.retrofitapi.screen.MainScreen
 
 @Composable
@@ -36,7 +34,7 @@ fun Navegacion(auth: AuthManager) {
         }
 
         composable<SignUp> {
-            SignUpScreen(auth) { 
+            SignUpScreen(auth) {
                 navController.popBackStack() 
             }
         }

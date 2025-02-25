@@ -23,15 +23,20 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    auth: AuthManager,
-    firestore: FirestoreManager,
-    navigateToLogin: () -> Unit
+    auth: AuthManager,      // Gestor de autenticación
+    firestore: FirestoreManager,  // Gestor de Firestore
+    navigateToLogin: () -> Unit   // Función de navegación a la pantalla de login
 ) {
+    // Estado del drawer (menú lateral)
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    // Scope para manejar corrutinas (usado para animaciones del drawer)
     val scope = rememberCoroutineScope()
+    // Estado para controlar qué pantalla se muestra (Pokémon o Entrenadores)
     var currentScreen by remember { mutableStateOf(Screen.Pokemon) }
+    // Estado para controlar la visibilidad del diálogo de logout
     var showLogoutDialog by remember { mutableStateOf(false) }
 
+    // Diálogo de confirmación para cerrar sesión
     if (showLogoutDialog) {
         LogoutDialog(
             onDismiss = { showLogoutDialog = false },
@@ -42,13 +47,15 @@ fun MainScreen(
         )
     }
 
+    // Menú lateral (Drawer)
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
+                // Espacio superior
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Header del Drawer
+                // Cabecera del menú con foto de perfil y email
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -72,9 +79,9 @@ fun MainScreen(
                     }
                 }
 
-                Divider()
+                Divider()  // Línea separadora
                 
-                // Elementos del menú
+                // Opciones de navegación del menú
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.Star, contentDescription = "Pokémon") },
                     label = { Text("Pokémon") },
@@ -95,10 +102,11 @@ fun MainScreen(
                     }
                 )
 
+                // Espaciador que empuja el botón de logout al fondo
                 Spacer(modifier = Modifier.weight(1f))
                 Divider()
                 
-                // Botón de logout
+                // Botón de cerrar sesión
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.ExitToApp, contentDescription = "Cerrar sesión") },
                     label = { Text("Cerrar sesión") },
@@ -108,7 +116,9 @@ fun MainScreen(
             }
         }
     ) {
+        // Estructura principal de la pantalla
         Scaffold(
+            // Barra superior con título y botón de menú
             topBar = {
                 TopAppBar(
                     title = { 
@@ -120,16 +130,21 @@ fun MainScreen(
                         )
                     },
                     navigationIcon = {
+                        // Botón para abrir el menú lateral
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(Icons.Default.Menu, contentDescription = "Menu")
                         }
                     },
+                    // Colores personalizados para la barra superior
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Cyan
+                        containerColor = Color.DarkGray,
+                        titleContentColor = Color.White,
+                        navigationIconContentColor = Color.White
                     )
                 )
             }
         ) { padding ->
+            // Contenedor principal que maneja el contenido según la pantalla seleccionada
             Box(modifier = Modifier.padding(padding)) {
                 when (currentScreen) {
                     Screen.Pokemon -> HomeScreen(
@@ -148,27 +163,23 @@ fun MainScreen(
     }
 }
 
+// Componente para mostrar el diálogo de confirmación de cierre de sesión
 @Composable
 private fun LogoutDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Cerrar Sesión") },
-        text = {
-            Text("¿Estás seguro de que deseas cerrar sesión?")
-        },
+        text = { Text("¿Estás seguro de que deseas cerrar sesión?") },
         confirmButton = {
-            Button(onClick = onConfirm) {
-                Text("Aceptar")
-            }
+            Button(onClick = onConfirm) { Text("Aceptar") }
         },
         dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("Cancelar")
-            }
+            Button(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }
 
+// Enum que define las pantallas disponibles en la aplicación
 private enum class Screen {
     Pokemon,
     Characters
