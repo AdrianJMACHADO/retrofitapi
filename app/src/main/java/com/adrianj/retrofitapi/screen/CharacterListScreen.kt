@@ -34,20 +34,10 @@ fun CharacterListScreen(
     )
     val uiState by viewModel.uiState.collectAsState()
 
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { viewModel.onAddCharacterSelected() },
-                containerColor = Color.Gray
-            ) {
-                Icon(Icons.Default.Add, "Añadir Entrenador")
-            }
-        }
-    ) { padding ->
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
         ) {
             // Imagen de fondo
             Image(
@@ -62,13 +52,20 @@ fun CharacterListScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(uiState.characters) { character ->
-                    CharacterItem(
-                        character = character,
-                        onDelete = { viewModel.deleteCharacter(character.id ?: "") },
-                        onUpdate = { viewModel.updateCharacter(it) }
-                    )
+            ) { if (!uiState.characters.isNullOrEmpty()) {
+                    items(uiState.characters) { character ->
+                        CharacterItem(
+                            character = character,
+                            onDelete = { viewModel.deleteCharacter(character.id ?: "") },
+                            onUpdate = { viewModel.updateCharacter(it) }
+                        )
+                    }
+                } else {
+                    item {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("No hay datos")
+                        }
+                    }
                 }
             }
 
@@ -82,9 +79,18 @@ fun CharacterListScreen(
                     auth = auth
                 )
             }
+            FloatingActionButton(
+                onClick = { viewModel.onAddCharacterSelected() },
+                containerColor = Color.Gray,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+            ) {
+                Icon(Icons.Default.Add, "Añadir Entrenador")
+            }
         }
     }
-}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -155,6 +161,7 @@ fun CharacterItem(
         )
     }
 
+    // Dialogo de eliminación de entrenador sin crear Composable para llamar a la función
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },

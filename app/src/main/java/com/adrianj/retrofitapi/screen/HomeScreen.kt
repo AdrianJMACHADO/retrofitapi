@@ -63,7 +63,6 @@ fun HomeScreen(
     val inicioViewModel = viewModel(HomeViewModel::class.java, factory = factory)
     val uiState by inicioViewModel.uiState.collectAsState()
 
-    Scaffold(
 //        topBar = {
 //            TopAppBar(
 //                title = {
@@ -113,81 +112,79 @@ fun HomeScreen(
 //                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Cyan)
 //            )
 //        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { inicioViewModel.onAddPokemonSelected() },
-                containerColor = Color.Gray
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Añadir pokemon")
-            }
-        }
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            if (uiState.showAddPokemonDialog) {
-                AddPokemonDialog(
-                    onPokemonAdded = { pokemon ->
-                        val currentUserId = auth.getCurrentUser()?.uid
-                        if (currentUserId != null) {
-                            inicioViewModel.addPokemon(
-                                Pokemon(
-                                    id = "",
-                                    userId = currentUserId,
-                                    idpersonaje = pokemon.idpersonaje,
-                                    name = pokemon.name,
-                                    tipo1 = pokemon.tipo1,
-                                    tipo2 = pokemon.tipo2
-                                )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        if (uiState.showAddPokemonDialog) {
+            AddPokemonDialog(
+                onPokemonAdded = { pokemon ->
+                    val currentUserId = auth.getCurrentUser()?.uid
+                    if (currentUserId != null) {
+                        inicioViewModel.addPokemon(
+                            Pokemon(
+                                id = "",
+                                userId = currentUserId,
+                                idpersonaje = pokemon.idpersonaje,
+                                name = pokemon.name,
+                                tipo1 = pokemon.tipo1,
+                                tipo2 = pokemon.tipo2
                             )
-                        }
-                        inicioViewModel.dismisShowAddPokemonDialog()
-                    },
-                    onDialogDismissed = { inicioViewModel.dismisShowAddPokemonDialog() },
-                    auth = auth,
-                    firestoreManager = firestore
-                )
-            }
-
-            // Imagen de fondo
-            Image(
-                painter = rememberAsyncImagePainter(model = R.drawable.fondo),
-                contentDescription = "Background",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-
-            // Lista de Pokémon
-            LazyColumn(
-                contentPadding = PaddingValues(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                if (!uiState.pokemons.isNullOrEmpty()) {
-                    items(uiState.pokemons) { pokemon ->
-                        PokemonItem(
-                            pokemon = pokemon,
-                            deletePokemon = {
-                                inicioViewModel.deletePokemonById(pokemon.id ?: "")
-                            },
-                            updatePokemon = {
-                                inicioViewModel.updatePokemon(it)
-                            },
-                            navigateToDetalle = { pokemon.id?.let { it1 -> navigateToDetalle(it1) } },
-                            firestoreManager = firestore
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
                     }
-                } else {
-                    item {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("No hay datos")
-                        }
+                    inicioViewModel.dismisShowAddPokemonDialog()
+                },
+                onDialogDismissed = { inicioViewModel.dismisShowAddPokemonDialog() },
+                auth = auth,
+                firestoreManager = firestore
+            )
+        }
+
+        // Imagen de fondo
+        Image(
+            painter = rememberAsyncImagePainter(model = R.drawable.fondo),
+            contentDescription = "Background",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+        // Lista de Pokémon
+        LazyColumn(
+            contentPadding = PaddingValues(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            if (!uiState.pokemons.isNullOrEmpty()) {
+                items(uiState.pokemons) { pokemon ->
+                    PokemonItem(
+                        pokemon = pokemon,
+                        deletePokemon = {
+                            inicioViewModel.deletePokemonById(pokemon.id ?: "")
+                        },
+                        updatePokemon = {
+                            inicioViewModel.updatePokemon(it)
+                        },
+                        navigateToDetalle = { pokemon.id?.let { it1 -> navigateToDetalle(it1) } },
+                        firestoreManager = firestore
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            } else {
+                item {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("No hay datos")
                     }
                 }
             }
+        }
+        FloatingActionButton(
+            onClick = { inicioViewModel.onAddPokemonSelected() },
+            containerColor = Color.Gray,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(imageVector = Icons.Default.Add, contentDescription = "Añadir pokemon")
         }
     }
 }
@@ -273,10 +270,10 @@ fun PokemonItem(
 
             Row {
                 IconButton(onClick = { showUpdateDialog = true }) {
-                    Icon(Icons.Default.Edit, contentDescription = "Editar")
+                    Icon(Icons.Default.Edit, contentDescription = "Editar", tint = MaterialTheme.colorScheme.primary)
                 }
                 IconButton(onClick = { showDeleteDialog = true }) {
-                    Icon(Icons.Default.Delete, contentDescription = "Borrar")
+                    Icon(Icons.Default.Delete, contentDescription = "Borrar", tint = MaterialTheme.colorScheme.error)
                 }
             }
         }
