@@ -1,10 +1,8 @@
 package com.adrianj.retrofitapi.model
 
-data class Pokemon(
+data class Character(
     val id: String? = null,
     val userId: String?,
-    val idpersonaje: String?,
     val name: String?,
-    val tipo1: String?,
-    val tipo2: String?
+    val region: String?,
 )

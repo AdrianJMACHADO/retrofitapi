@@ -1,7 +1,7 @@
 package com.adrianj.retrofitapi.navegacion
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.BlendMode.Companion.Screen
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,13 +12,13 @@ import com.adrianj.retrofitapi.screen.ForgotPasswordScreen
 import com.adrianj.retrofitapi.screen.HomeScreen
 import com.adrianj.retrofitapi.screen.LoginScreen
 import com.adrianj.retrofitapi.screen.SignUpScreen
+import com.adrianj.retrofitapi.screen.CharacterListScreen
 
 @Composable
 fun Navegacion(auth: AuthManager) {
     val navController = rememberNavController()
     val context = LocalContext.current
-    val firestore = FirestoreManager(auth, context)
-
+    val firestoreManager = remember { FirestoreManager(auth, context) }
 
     NavHost(navController = navController, startDestination = Login) {
         composable<Login> {
@@ -42,23 +42,32 @@ fun Navegacion(auth: AuthManager) {
 
         composable<Home> {
             HomeScreen(
-                auth,
-                firestore,
-                {
+                auth = auth,
+                firestore = firestoreManager,
+                navigateToLogin = {
                     navController.navigate(Login) {
                         popUpTo(Home){ inclusive = true }
                     }
-                }, { id ->
+                },
+                navigateToDetalle = { pokemonId ->
+                    // Si tienes una ruta para detalles, aquí irá la navegación
                 }
             )
         }
 
-        composable <ForgotPassword> {
+        composable<ForgotPassword> {
             ForgotPasswordScreen(
                 auth
             ) { navController.navigate(Login) {
                 popUpTo(Login){ inclusive = true }
             } }
+        }
+
+        composable<CharacterList> {
+            CharacterListScreen(
+                auth = auth,
+                firestore = firestoreManager
+            )
         }
     }
 }

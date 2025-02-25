@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +29,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.adrianj.retrofitapi.data.AuthManager
+import com.adrianj.retrofitapi.data.FirestoreManager
+import com.adrianj.retrofitapi.model.Character
 import com.adrianj.retrofitapi.model.Pokemon
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,12 +38,15 @@ import com.adrianj.retrofitapi.model.Pokemon
 fun AddPokemonDialog(
     onPokemonAdded: (Pokemon) -> Unit,
     onDialogDismissed: () -> Unit,
-    auth: AuthManager
+    auth: AuthManager,
+    firestoreManager: FirestoreManager
 ) {
-
     var name by remember { mutableStateOf("") }
     var tipo1 by remember { mutableStateOf("") }
-    var tipo2 by remember { mutableStateOf("") }
+    var tipo2 by remember { mutableStateOf("Nada") }
+    var selectedCharacter by remember { mutableStateOf<Character?>(null) }
+    
+    val characters by firestoreManager.getCharacters().collectAsState(initial = emptyList())
 
     val tiposPokemon = listOf(
         "Normal", "Fuego", "Agua", "Planta", "Eléctrico", "Hielo",
@@ -50,6 +56,7 @@ fun AddPokemonDialog(
 
     var expandedTipo1 by remember { mutableStateOf(false) }
     var expandedTipo2 by remember { mutableStateOf(false) }
+    var expandedCharacter by remember { mutableStateOf(false) }
 
     AlertDialog(
         title = { Text("Añadir pokemon") },
@@ -57,24 +64,24 @@ fun AddPokemonDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    val newPokemon = Pokemon(
-                        userId = auth.getCurrentUser()?.uid,
-                        name = name,
-                        tipo1 = tipo1,
-                        tipo2 = tipo2,
-                    )
-                    onPokemonAdded(newPokemon)
-                    name = ""
-                    tipo1 = ""
-                }
+                    selectedCharacter?.id?.let { characterId ->
+                        val newPokemon = Pokemon(
+                            userId = auth.getCurrentUser()?.uid,
+                            name = name,
+                            tipo1 = tipo1,
+                            tipo2 = tipo2,
+                            idpersonaje = characterId
+                        )
+                        onPokemonAdded(newPokemon)
+                    }
+                },
+                enabled = selectedCharacter != null && name.isNotEmpty() && tipo1.isNotEmpty()
             ) {
                 Text("Añadir")
             }
         },
         dismissButton = {
-            Button(
-                onClick = { onDialogDismissed() }
-            ) {
+            Button(onClick = { onDialogDismissed() }) {
                 Text("Cancelar")
             }
         },
@@ -88,33 +95,65 @@ fun AddPokemonDialog(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
 
+                // Selector de Personaje
+                ExposedDropdownMenuBox(
+                    expanded = expandedCharacter,
+                    onExpandedChange = { expandedCharacter = !expandedCharacter }
+                ) {
+                    TextField(
+                        value = selectedCharacter?.name ?: "Selecciona un entrenador",
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = {
+                            Icon(
+                                if (expandedCharacter) Icons.Filled.KeyboardArrowUp else Icons.Filled.ArrowDropDown,
+                                "Expandir"
+                            )
+                        },
+                        modifier = Modifier.menuAnchor()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedCharacter,
+                        onDismissRequest = { expandedCharacter = false }
+                    ) {
+                        characters.forEach { character ->
+                            DropdownMenuItem(
+                                text = { Text("${character.name} (${character.region})") },
+                                onClick = {
+                                    selectedCharacter = character
+                                    expandedCharacter = false
+                                }
+                            )
+                        }
+                    }
+                }
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Dropdown Tipo 1
+                // Selector de Tipo 1
                 ExposedDropdownMenuBox(
                     expanded = expandedTipo1,
-                    onExpandedChange = { expandedTipo1 = it }
+                    onExpandedChange = { expandedTipo1 = !expandedTipo1 }
                 ) {
                     TextField(
                         value = tipo1,
                         onValueChange = {},
-                        label = { Text("Tipo 1") },
                         readOnly = true,
+                        label = { Text("Tipo 1") },
                         trailingIcon = {
                             Icon(
-                                imageVector = if (expandedTipo1) Icons.Filled.KeyboardArrowUp else Icons.Filled.ArrowDropDown,
-                                contentDescription = "Desplegar lista"
+                                if (expandedTipo1) Icons.Filled.KeyboardArrowUp else Icons.Filled.ArrowDropDown,
+                                "Expandir"
                             )
                         },
-                        modifier = Modifier.menuAnchor() // 🚀 Agregado para que funcione correctamente
+                        modifier = Modifier.menuAnchor()
                     )
-                    DropdownMenu(
+                    ExposedDropdownMenu(
                         expanded = expandedTipo1,
                         onDismissRequest = { expandedTipo1 = false }
                     ) {
                         tiposPokemon.forEach { tipo ->
                             DropdownMenuItem(
-                                text = { Text(tipo, fontSize = 14.sp) },
+                                text = { Text(tipo) },
                                 onClick = {
                                     tipo1 = tipo
                                     expandedTipo1 = false
@@ -124,31 +163,33 @@ fun AddPokemonDialog(
                     }
                 }
 
-// Dropdown Tipo 2
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Selector de Tipo 2
                 ExposedDropdownMenuBox(
                     expanded = expandedTipo2,
-                    onExpandedChange = { expandedTipo2 = it }
+                    onExpandedChange = { expandedTipo2 = !expandedTipo2 }
                 ) {
                     TextField(
                         value = tipo2,
                         onValueChange = {},
-                        label = { Text("Tipo 2") },
                         readOnly = true,
+                        label = { Text("Tipo 2") },
                         trailingIcon = {
                             Icon(
-                                imageVector = if (expandedTipo2) Icons.Filled.KeyboardArrowUp else Icons.Filled.ArrowDropDown,
-                                contentDescription = "Desplegar lista"
+                                if (expandedTipo2) Icons.Filled.KeyboardArrowUp else Icons.Filled.ArrowDropDown,
+                                "Expandir"
                             )
                         },
-                        modifier = Modifier.menuAnchor() // 🚀 Agregado para que funcione correctamente
+                        modifier = Modifier.menuAnchor()
                     )
-                    DropdownMenu(
+                    ExposedDropdownMenu(
                         expanded = expandedTipo2,
                         onDismissRequest = { expandedTipo2 = false }
                     ) {
                         tiposPokemon.forEach { tipo ->
                             DropdownMenuItem(
-                                text = { Text(tipo, fontSize = 14.sp) },
+                                text = { Text(tipo) },
                                 onClick = {
                                     tipo2 = tipo
                                     expandedTipo2 = false
@@ -157,12 +198,7 @@ fun AddPokemonDialog(
                         }
                     }
                 }
-
             }
-
-
         }
-
     )
-
 }

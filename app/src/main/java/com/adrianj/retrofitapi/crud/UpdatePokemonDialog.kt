@@ -37,6 +37,7 @@ fun UpdatePokemonDialog(
     var name by remember { mutableStateOf(pokemon.name!!) }
     var tipo1 by remember { mutableStateOf(pokemon.tipo1!!) }
     var tipo2 by remember { mutableStateOf(pokemon.tipo2!!) }
+    var idpersonaje by remember { mutableStateOf(pokemon.idpersonaje!!) }
 
     val tiposPokemon = listOf(
         "Normal", "Fuego", "Agua", "Planta", "Eléctrico", "Hielo",
@@ -59,6 +60,7 @@ fun UpdatePokemonDialog(
                         name = name,
                         tipo1 = tipo1,
                         tipo2 = tipo2,
+                        idpersonaje = idpersonaje
                     )
                     onPokemonUpdated(newPokemon)
                     onDialogDismissed()

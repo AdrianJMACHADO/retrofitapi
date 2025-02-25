@@ -13,3 +13,6 @@ object Home
 
 @Serializable
 object ForgotPassword
+
+@Serializable
+object CharacterList

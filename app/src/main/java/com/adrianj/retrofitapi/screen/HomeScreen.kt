@@ -163,15 +163,17 @@ fun HomeScreen(
                             Pokemon(
                                 id = "",
                                 userId = auth.getCurrentUser()?.uid,
-                                pokemon.name ?: "",
-                                pokemon.tipo1 ?: "",
-                                pokemon.tipo2 ?: "",
+                                idpersonaje = pokemon.idpersonaje,
+                                name = pokemon.name,
+                                tipo1 = pokemon.tipo1,
+                                tipo2 = pokemon.tipo2
                             )
                         )
                         inicioViewModel.dismisShowAddPokemonDialog()
                     },
                     onDialogDismissed = { inicioViewModel.dismisShowAddPokemonDialog() },
-                    auth
+                    auth = auth,
+                    firestoreManager = firestore
                 )
             }
 
@@ -203,7 +205,8 @@ fun HomeScreen(
                             updatePokemon = {
                                 inicioViewModel.updatePokemon(it)
                             },
-                            navigateToDetalle = { pokemon.id?.let { it1 -> navigateToDetalle(it1) } }
+                            navigateToDetalle = { pokemon.id?.let { it1 -> navigateToDetalle(it1) } },
+                            firestoreManager = firestore
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
@@ -289,104 +292,90 @@ fun PokemonItem(
     pokemon: Pokemon,
     deletePokemon: () -> Unit,
     updatePokemon: (Pokemon) -> Unit,
-    navigateToDetalle: (String) -> Unit
+    navigateToDetalle: () -> Unit,
+    firestoreManager: FirestoreManager
 ) {
-    var showDeletePokemonDialog by remember { mutableStateOf(false) }
-    var showUpdatePokemonDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showUpdateDialog by remember { mutableStateOf(false) }
+    var characterName by remember { mutableStateOf<String?>(null) }
 
-    if (showDeletePokemonDialog) {
-        DeletePokemonDialog(
-            onConfirmDelete = {
-                deletePokemon()
-                showDeletePokemonDialog = false
-            },
-            onDismiss = { showDeletePokemonDialog = false }
-        )
-    }
-
-    if (showUpdatePokemonDialog) {
-        UpdatePokemonDialog(
-            pokemon = pokemon,
-            onPokemonUpdated = { pokemon ->
-                updatePokemon(pokemon)
-                showUpdatePokemonDialog = false
-            },
-            onDialogDismissed = { showUpdatePokemonDialog = false }
-        )
+    // Obtener el nombre del personaje
+    LaunchedEffect(pokemon.idpersonaje) {
+        pokemon.idpersonaje?.let { id ->
+            val character = firestoreManager.getCharacterById(id)
+            characterName = character?.name
+        }
     }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable { pokemon.id?.let { navigateToDetalle(it) } },
-        elevation = CardDefaults.cardElevation(6.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFAFAFA))
+            .clickable { navigateToDetalle() },
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            pokemon.name?.let { Text(text = it, style = MaterialTheme.typography.titleMedium) }
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Row {
-                Text(text = "Tipo: ${pokemon.tipo1}", style = MaterialTheme.typography.bodySmall)
-                Spacer(modifier = Modifier.width(8.dp))
-                if (pokemon.tipo2?.isNotEmpty() == true) {
-                    Text(text = "/ ${pokemon.tipo2}", style = MaterialTheme.typography.bodySmall)
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Función para determinar el color de la barra según el valor
-            fun getStatColor(value: Int): Color {
-                return when {
-                    value <= 70 -> Color.Red
-                    value in 71..80 -> Color(0xFFFF6600) // Naranja oscuro
-                    value in 81..90 -> Color(0xFFFFA500) // Naranja estándar
-                    value in 91..100 -> Color.Yellow
-                    value in 101..110 -> Color(0xFFBFFF00) // Amarillo verdoso
-                    value in 111..120 -> Color.Green
-                    value in 121..130 -> Color(0xFF00BFA5) // Verde azulado
-                    value in 131..150 -> Color.Cyan
-                    value in 151..170 -> Color(0xFF00AAFF) // Azul celeste
-                    value in 171..200 -> Color(0xFF80D8FF) // Celeste claro
-                    else -> Color(0xFFE0F7FA) // Azul muy claro para valores mayores a 200
-                }
-            }
-
-            // Función para mostrar barra de progreso con color dinámico
-            @Composable
-            fun StatBar(label: String, value: Int, maxValue: Int = 255) {
-                Column {
-                    Text(text = "$label: $value", style = MaterialTheme.typography.bodySmall)
-                    LinearProgressIndicator(
-                        progress = { value / maxValue.toFloat() },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(6.dp)
-                            .clip(MaterialTheme.shapes.small),
-                        color = getStatColor(value), // Color dinámico según el valor
-                        trackColor = Color(0xFFBDBDBD),
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                }
-            }
-
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.End
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { showUpdatePokemonDialog = true }) {
-                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Editar")
+                Column {
+                    Text(
+                        text = pokemon.name ?: "",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "Tipo: ${pokemon.tipo1}${if (pokemon.tipo2 != "Nada") " / ${pokemon.tipo2}" else ""}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    characterName?.let {
+                        Text(
+                            text = "Entrenador: $it",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
-                IconButton(onClick = { showDeletePokemonDialog = true }) {
-                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Eliminar")
+
+                Row {
+                    IconButton(onClick = { showUpdateDialog = true }) {
+                        Icon(Icons.Default.Edit, contentDescription = "Editar")
+                    }
+                    IconButton(onClick = { showDeleteDialog = true }) {
+                        Icon(Icons.Default.Delete, contentDescription = "Borrar")
+                    }
                 }
             }
         }
     }
+
+    if (showDeleteDialog) {
+        DeletePokemonDialog(
+            onConfirmDelete = {
+                deletePokemon()
+                showDeleteDialog = false
+            },
+            onDismiss = { showDeleteDialog = false }
+        )
+    }
+
+    if (showUpdateDialog) {
+        UpdatePokemonDialog(
+            pokemon = pokemon,
+            onPokemonUpdated = {
+                updatePokemon(it)
+                showUpdateDialog = false
+            },
+            onDialogDismissed = { showUpdateDialog = false }
+        )
+    }
 }
+
 @Composable
 fun LogoutDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(
