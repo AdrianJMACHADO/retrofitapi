@@ -34,12 +34,12 @@ fun PokemonListScreen() {
             modifier = Modifier.fillMaxSize()
         ) {
             // Imagen de fondo
-            Image(
-                painter = rememberAsyncImagePainter(model = R.drawable.fondo),
-                contentDescription = "Background",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
+//            Image(
+//                painter = rememberAsyncImagePainter(model = R.drawable.fondo),
+//                contentDescription = "Background",
+//                contentScale = ContentScale.Crop,
+//                modifier = Modifier.fillMaxSize()
+//            )
 
             // Lista de Pokémon
             LazyColumn(

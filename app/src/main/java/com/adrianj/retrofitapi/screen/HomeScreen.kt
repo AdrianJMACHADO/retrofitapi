@@ -143,7 +143,7 @@ fun HomeScreen(
 
         // Imagen de fondo
         Image(
-            painter = rememberAsyncImagePainter(model = R.drawable.fondo),
+            painter = rememberAsyncImagePainter(model = R.drawable.fondo_entrenadores2),
             contentDescription = "Background",
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()

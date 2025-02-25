@@ -1,5 +1,6 @@
 package com.adrianj.retrofitapi.data
 
+import android.util.Log
 import com.adrianj.retrofitapi.model.CharacterDB
 import com.adrianj.retrofitapi.model.Character
 import com.adrianj.retrofitapi.model.Pokemon
@@ -7,6 +8,7 @@ import com.adrianj.retrofitapi.model.PokemonDB
 import com.google.firebase.firestore.snapshots
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 
@@ -24,9 +26,12 @@ class FirestoreManager(private val auth: AuthManager, context: android.content.C
     }
 
     //    Funciones de los pokemon
+
     fun getCharacters(): Flow<List<Character>> {
+//        val currentUserId = getCurrentUserId()
         return firestore.collection(COLLECTION_CHARACTERS)
             .whereEqualTo("userId", getCurrentUserId())
+//            .whereIn("userId", listOf(currentUserId, "all"))
             .snapshots()
             .map { qs ->
                 qs.documents.mapNotNull { ds ->
@@ -68,24 +73,30 @@ class FirestoreManager(private val auth: AuthManager, context: android.content.C
     }
 
     fun getPokemonByCharacter(characterId: String): Flow<List<Pokemon>> {
-        return firestore.collection(COLLECTION_POKEMON)
-            .whereEqualTo("userId", getCurrentUserId())
-            .whereEqualTo("idpersonaje", characterId)
-            .snapshots()
-            .map { qs ->
-                qs.documents.mapNotNull { ds ->
-                    ds.toObject(PokemonDB::class.java)?.let { pokemonDB ->
-                        Pokemon(
-                            id = ds.id,
-                            idpersonaje = pokemonDB.idpersonaje,
-                            userId = pokemonDB.userId,
-                            name = pokemonDB.name,
-                            tipo1 = pokemonDB.tipo1,
-                            tipo2 = pokemonDB.tipo2
-                        )
+//        val currentUserId = getCurrentUserId()
+            return firestore.collection(COLLECTION_POKEMON)
+                .whereEqualTo("userId", getCurrentUserId())
+//                .whereIn("userId", listOf(currentUserId, "all"))
+                .whereEqualTo("idpersonaje", characterId)
+                .snapshots()
+                .map { qs ->
+                    qs.documents.mapNotNull { ds ->
+                        ds.toObject(PokemonDB::class.java)?.let { pokemonDB ->
+                            Pokemon(
+                                id = ds.id,
+                                idpersonaje = pokemonDB.idpersonaje,
+                                userId = pokemonDB.userId,
+                                name = pokemonDB.name,
+                                tipo1 = pokemonDB.tipo1,
+                                tipo2 = pokemonDB.tipo2
+                            )
+                        }
                     }
                 }
-            }
+                .catch { e ->
+                    Log.e("FirestoreError", "Error al obtener documentos", e)
+                    emit(emptyList())  // Emitir una lista vacía en caso de error
+                }
     }
 
     suspend fun addPokemon(pokemon: Pokemon) {
