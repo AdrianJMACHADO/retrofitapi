@@ -44,6 +44,7 @@ import com.adrianj.retrofitapi.data.AuthManager
 import com.adrianj.retrofitapi.data.FirestoreManager
 import com.adrianj.retrofitapi.model.Pokemon
 import com.adrianj.retrofitapi.viewmodel.PokemonViewModel
+import com.adrianj.retrofitapi.api.RetrofitClient
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +54,6 @@ fun HomeScreen(
     navigateToLogin: () -> Unit,
     navigateToDetalle: (String) -> Unit
 ) {
-    var showDialog by remember { mutableStateOf(false) }
     val user = auth.getCurrentUser()
     val viewModel = PokemonViewModel()
     val pokemonList by viewModel.pokemonList.collectAsState()
@@ -64,62 +64,55 @@ fun HomeScreen(
     val uiState by inicioViewModel.uiState.collectAsState()
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Row(
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (user?.photoUrl != null) {
-                            AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data(user.photoUrl)
-                                    .crossfade(true)
-                                    .build(),
-                                contentDescription = "Imagen",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .size(40.dp)
-                            )
-                        } else {
-                            Image(
-                                painter = painterResource(R.drawable.profile),
-                                contentDescription = "Foto de perfil por defecto",
-                                modifier = Modifier
-                                    .padding(end = 8.dp)
-                                    .size(40.dp)
-                                    .clip(CircleShape)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Column {
-                            Text(
-                                text = user?.displayName ?: "Anónimo",
-                                fontSize = 20.sp,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = user?.email ?: "Sin correo",
-                                fontSize = 12.sp,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Cyan),
-                actions = {
-                    IconButton(onClick = {
-                        showDialog = true
-                    }) {
-                        Icon(Icons.AutoMirrored.Outlined.ExitToApp, contentDescription = "Cerrar sesión")
-                    }
-                }
-            )
-        },
+//        topBar = {
+//            TopAppBar(
+//                title = {
+//                    Row(
+//                        horizontalArrangement = Arrangement.Start,
+//                        verticalAlignment = Alignment.CenterVertically
+//                    ) {
+//                        if (user?.photoUrl != null) {
+//                            AsyncImage(
+//                                model = ImageRequest.Builder(LocalContext.current)
+//                                    .data(user.photoUrl)
+//                                    .crossfade(true)
+//                                    .build(),
+//                                contentDescription = "Imagen",
+//                                contentScale = ContentScale.Crop,
+//                                modifier = Modifier
+//                                    .clip(CircleShape)
+//                                    .size(40.dp)
+//                            )
+//                        } else {
+//                            Image(
+//                                painter = painterResource(R.drawable.profile),
+//                                contentDescription = "Foto de perfil por defecto",
+//                                modifier = Modifier
+//                                    .padding(end = 8.dp)
+//                                    .size(40.dp)
+//                                    .clip(CircleShape)
+//                            )
+//                        }
+//                        Spacer(modifier = Modifier.width(10.dp))
+//                        Column {
+//                            Text(
+//                                text = user?.displayName ?: "Anónimo",
+//                                fontSize = 20.sp,
+//                                maxLines = 1,
+//                                overflow = TextOverflow.Ellipsis
+//                            )
+//                            Text(
+//                                text = user?.email ?: "Sin correo",
+//                                fontSize = 12.sp,
+//                                maxLines = 1,
+//                                overflow = TextOverflow.Ellipsis
+//                            )
+//                        }
+//                    }
+//                },
+//                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Cyan)
+//            )
+//        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { inicioViewModel.onAddPokemonSelected() },
@@ -134,41 +127,22 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            if (showDialog) {
-                LogoutDialog(
-                    onDismiss = { showDialog = false },
-                    onConfirm = {
-                        auth.signOut()
-                        navigateToLogin()
-                        showDialog = false
-                    }
-                )
-            }
-
-            if (uiState.showLogoutDialog) {
-                LogoutDialog(
-                    onDismiss = { inicioViewModel.dismisShowLogoutDialog() },
-                    onConfirm = {
-                        auth.signOut()
-                        navigateToLogin()
-                        inicioViewModel.dismisShowLogoutDialog()
-                    }
-                )
-            }
-
             if (uiState.showAddPokemonDialog) {
                 AddPokemonDialog(
                     onPokemonAdded = { pokemon ->
-                        inicioViewModel.addPokemon(
-                            Pokemon(
-                                id = "",
-                                userId = auth.getCurrentUser()?.uid,
-                                idpersonaje = pokemon.idpersonaje,
-                                name = pokemon.name,
-                                tipo1 = pokemon.tipo1,
-                                tipo2 = pokemon.tipo2
+                        val currentUserId = auth.getCurrentUser()?.uid
+                        if (currentUserId != null) {
+                            inicioViewModel.addPokemon(
+                                Pokemon(
+                                    id = "",
+                                    userId = currentUserId,
+                                    idpersonaje = pokemon.idpersonaje,
+                                    name = pokemon.name,
+                                    tipo1 = pokemon.tipo1,
+                                    tipo2 = pokemon.tipo2
+                                )
                             )
-                        )
+                        }
                         inicioViewModel.dismisShowAddPokemonDialog()
                     },
                     onDialogDismissed = { inicioViewModel.dismisShowAddPokemonDialog() },
@@ -191,10 +165,6 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-//                items(pokemonList) { pokemon ->
-//                    PokemonItem(pokemon, viewModel)
-//                }
-
                 if (!uiState.pokemons.isNullOrEmpty()) {
                     items(uiState.pokemons) { pokemon ->
                         PokemonItem(
@@ -221,71 +191,6 @@ fun HomeScreen(
         }
     }
 }
-//@Composable
-//fun PokemonItem(pokemon: Pokemon, viewModel: PokemonViewModel) {
-//    val types by viewModel.pokemonTypes.collectAsState()
-//    val pokemonTypes = types[pokemon.id] ?: emptyList()
-//
-//    LaunchedEffect(pokemon.id) {
-//        if (pokemon.id !in types) {
-//            viewModel.fetchPokemonTypes(pokemon.id)
-//        }
-//    }
-//
-//    Card(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(8.dp),
-//        colors = CardDefaults.cardColors(
-//            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f) // Fondo translúcido
-//        ),
-//        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-//    ) {
-//        Row(
-//            verticalAlignment = Alignment.CenterVertically,
-//            modifier = Modifier.padding(16.dp)
-//        ) {
-//            // Imagen del Pokémon
-//            Image(
-//                painter = rememberAsyncImagePainter(model = pokemon.imageUrl),
-//                contentDescription = "${pokemon.name} image",
-//                contentScale = ContentScale.Crop,
-//                modifier = Modifier
-//                    .size(64.dp)
-//                    .padding(end = 16.dp)
-//            )
-//
-//            // Nombre y Tipos
-//            Column(
-//                modifier = Modifier.weight(1f)
-//            ) {
-//                Text(
-//                    text = pokemon.name.replaceFirstChar { it.uppercase() },
-//                    fontSize = 18.sp
-//                )
-//
-//                // Tipos
-//                if (pokemonTypes.isNotEmpty()) {
-//                    Row {
-//                        pokemonTypes.forEach { type ->
-//                            Text(
-//                                text = type.replaceFirstChar { it.uppercase() },
-//                                fontSize = 14.sp,
-//                                modifier = Modifier
-//                                    .padding(end = 8.dp)
-//                                    .background(
-//                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-//                                        shape = MaterialTheme.shapes.small
-//                                    )
-//                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-//                            )
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
 
 @Composable
 fun PokemonItem(
@@ -298,12 +203,24 @@ fun PokemonItem(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showUpdateDialog by remember { mutableStateOf(false) }
     var characterName by remember { mutableStateOf<String?>(null) }
+    var pokemonImageUrl by remember { mutableStateOf<String?>(null) }
 
-    // Obtener el nombre del personaje
-    LaunchedEffect(pokemon.idpersonaje) {
+    // Obtener el nombre del personaje y la imagen del Pokémon
+    LaunchedEffect(pokemon.idpersonaje, pokemon.name) {
         pokemon.idpersonaje?.let { id ->
             val character = firestoreManager.getCharacterById(id)
             characterName = character?.name
+        }
+        
+        // Obtener la imagen del Pokémon de la PokeAPI
+        pokemon.name?.let { pokemonName ->
+            try {
+                val response = RetrofitClient.pokeApiService.getPokemonByName(pokemonName.lowercase())
+                pokemonImageUrl = response.sprites.frontDefault
+            } catch (e: Exception) {
+                // Si hay error, dejamos la imagen como null
+                pokemonImageUrl = null
+            }
         }
     }
 
@@ -314,16 +231,27 @@ fun PokemonItem(
             .clickable { navigateToDetalle() },
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
             ) {
+                // Imagen del Pokémon
+                AsyncImage(
+                    model = pokemonImageUrl ?: R.drawable.ic_launcher_foreground,
+                    contentDescription = "Imagen de ${pokemon.name}",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .padding(end = 16.dp),
+                    contentScale = ContentScale.Fit
+                )
+
                 Column {
                     Text(
                         text = pokemon.name ?: "",
@@ -341,14 +269,14 @@ fun PokemonItem(
                         )
                     }
                 }
+            }
 
-                Row {
-                    IconButton(onClick = { showUpdateDialog = true }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Editar")
-                    }
-                    IconButton(onClick = { showDeleteDialog = true }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Borrar")
-                    }
+            Row {
+                IconButton(onClick = { showUpdateDialog = true }) {
+                    Icon(Icons.Default.Edit, contentDescription = "Editar")
+                }
+                IconButton(onClick = { showDeleteDialog = true }) {
+                    Icon(Icons.Default.Delete, contentDescription = "Borrar")
                 }
             }
         }
@@ -374,25 +302,4 @@ fun PokemonItem(
             onDialogDismissed = { showUpdateDialog = false }
         )
     }
-}
-
-@Composable
-fun LogoutDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Cerrar Sesión") },
-        text = {
-            Text("¿Estás seguro de que deseas cerrar sesión?")
-        },
-        confirmButton = {
-            Button(onClick = onConfirm) {
-                Text("Aceptar")
-            }
-        },
-        dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("Cancelar")
-            }
-        }
-    )
 }

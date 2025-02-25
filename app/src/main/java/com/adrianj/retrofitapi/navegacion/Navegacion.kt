@@ -13,6 +13,7 @@ import com.adrianj.retrofitapi.screen.HomeScreen
 import com.adrianj.retrofitapi.screen.LoginScreen
 import com.adrianj.retrofitapi.screen.SignUpScreen
 import com.adrianj.retrofitapi.screen.CharacterListScreen
+import com.adrianj.retrofitapi.screen.MainScreen
 
 @Composable
 fun Navegacion(auth: AuthManager) {
@@ -35,39 +36,29 @@ fun Navegacion(auth: AuthManager) {
         }
 
         composable<SignUp> {
-            SignUpScreen(
-                auth
-            ) { navController.popBackStack() }
+            SignUpScreen(auth) { 
+                navController.popBackStack() 
+            }
         }
 
         composable<Home> {
-            HomeScreen(
+            MainScreen(
                 auth = auth,
                 firestore = firestoreManager,
                 navigateToLogin = {
                     navController.navigate(Login) {
-                        popUpTo(Home){ inclusive = true }
+                        popUpTo(Home) { inclusive = true }
                     }
-                },
-                navigateToDetalle = { pokemonId ->
-                    // Si tienes una ruta para detalles, aquí irá la navegación
                 }
             )
         }
 
         composable<ForgotPassword> {
-            ForgotPasswordScreen(
-                auth
-            ) { navController.navigate(Login) {
-                popUpTo(Login){ inclusive = true }
-            } }
-        }
-
-        composable<CharacterList> {
-            CharacterListScreen(
-                auth = auth,
-                firestore = firestoreManager
-            )
+            ForgotPasswordScreen(auth) { 
+                navController.navigate(Login) {
+                    popUpTo(Login) { inclusive = true }
+                }
+            }
         }
     }
 }

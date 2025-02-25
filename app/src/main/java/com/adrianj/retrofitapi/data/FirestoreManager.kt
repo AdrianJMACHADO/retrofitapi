@@ -10,9 +10,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 
-class FirestoreManager(auth: AuthManager, context: android.content.Context) {
+class FirestoreManager(private val auth: AuthManager, context: android.content.Context) {
     private val firestore = FirebaseFirestore.getInstance()
-    private val userId = auth.getCurrentUser()?.uid
+    
+    // Modificar para obtener el userId en tiempo real
+    private fun getCurrentUserId(): String? {
+        return auth.getCurrentUser()?.uid
+    }
 
     companion object{
         private const val COLLECTION_POKEMON = "pokemon"
@@ -22,7 +26,7 @@ class FirestoreManager(auth: AuthManager, context: android.content.Context) {
     //    Funciones de los pokemon
     fun getCharacters(): Flow<List<Character>> {
         return firestore.collection(COLLECTION_CHARACTERS)
-            .whereEqualTo("userId", userId)
+            .whereEqualTo("userId", getCurrentUserId())
             .snapshots()
             .map { qs ->
                 qs.documents.mapNotNull { ds ->
@@ -42,7 +46,7 @@ class FirestoreManager(auth: AuthManager, context: android.content.Context) {
         val characterDB = CharacterDB(
             name = name,
             region = region,
-            userId = userId ?: throw Exception("Usuario no autenticado")
+            userId = getCurrentUserId() ?: throw Exception("Usuario no autenticado")
         )
         firestore.collection(COLLECTION_CHARACTERS).add(characterDB).await()
     }
@@ -55,7 +59,7 @@ class FirestoreManager(auth: AuthManager, context: android.content.Context) {
     suspend fun addPokemon(name: String, tipo1: String, tipo2: String, idpersonaje: String) {
         val pokemonDB = PokemonDB(
             name = name,
-            userId = userId ?: throw Exception("Usuario no autenticado"),
+            userId = getCurrentUserId() ?: throw Exception("Usuario no autenticado"),
             idpersonaje = idpersonaje,
             tipo1 = tipo1,
             tipo2 = tipo2
@@ -65,7 +69,7 @@ class FirestoreManager(auth: AuthManager, context: android.content.Context) {
 
     fun getPokemonByCharacter(characterId: String): Flow<List<Pokemon>> {
         return firestore.collection(COLLECTION_POKEMON)
-            .whereEqualTo("userId", userId)
+            .whereEqualTo("userId", getCurrentUserId())
             .whereEqualTo("idpersonaje", characterId)
             .snapshots()
             .map { qs ->
@@ -85,18 +89,42 @@ class FirestoreManager(auth: AuthManager, context: android.content.Context) {
     }
 
     suspend fun addPokemon(pokemon: Pokemon) {
-        firestore.collection(COLLECTION_POKEMON).add(pokemon).await()
+        val currentUserId = getCurrentUserId() ?: throw Exception("Usuario no autenticado")
+        val pokemonDB = PokemonDB(
+            name = pokemon.name ?: "",
+            userId = currentUserId,  // Usar el ID actual
+            tipo1 = pokemon.tipo1 ?: "",
+            tipo2 = pokemon.tipo2 ?: "Nada",
+            idpersonaje = pokemon.idpersonaje ?: ""
+        )
+        firestore.collection(COLLECTION_POKEMON).add(pokemonDB).await()
     }
 
     suspend fun updatePokemon(pokemon: Pokemon) {
-        val pokemonRef = pokemon.id?.let {
-            firestore.collection("pokemon").document(it)
+        val currentUserId = getCurrentUserId()
+        if (pokemon.userId == currentUserId) {  // Solo actualizar si el pokemon pertenece al usuario actual
+            val pokemonRef = pokemon.id?.let {
+                firestore.collection(COLLECTION_POKEMON).document(it)
+            }
+            pokemonRef?.set(pokemon)?.await()
         }
-        pokemonRef?.set(pokemon)?.await()
     }
 
     suspend fun deletePokemonById(pokemonId: String) {
-        firestore.collection("pokemon").document(pokemonId).delete().await()
+        val currentUserId = getCurrentUserId()
+        val pokemon = firestore.collection(COLLECTION_POKEMON)
+            .document(pokemonId)
+            .get()
+            .await()
+            .toObject(PokemonDB::class.java)
+
+        // Solo eliminar si el pokemon pertenece al usuario actual
+        if (pokemon?.userId == currentUserId) {
+            firestore.collection(COLLECTION_POKEMON)
+                .document(pokemonId)
+                .delete()
+                .await()
+        }
     }
 
     suspend fun getCharacterById(characterId: String): Character? {
@@ -115,20 +143,25 @@ class FirestoreManager(auth: AuthManager, context: android.content.Context) {
     }
 
     fun getPokemon(): Flow<List<Pokemon>> {
+        println("DEBUG: Current userId: ${getCurrentUserId()}")
         return firestore.collection(COLLECTION_POKEMON)
-            .whereEqualTo("userId", userId)
+            .whereEqualTo("userId", getCurrentUserId())
             .snapshots()
             .map { querySnapshot ->
+                println("DEBUG: Query snapshot size: ${querySnapshot.size()}")
                 querySnapshot.documents.mapNotNull { document ->
                     document.toObject(PokemonDB::class.java)?.let { pokemonDB ->
-                        Pokemon(
-                            id = document.id,
-                            userId = pokemonDB.userId,
-                            name = pokemonDB.name,
-                            tipo1 = pokemonDB.tipo1,
-                            tipo2 = pokemonDB.tipo2,
-                            idpersonaje = pokemonDB.idpersonaje
-                        )
+                        println("DEBUG: Pokemon userId: ${pokemonDB.userId}")
+                        if (pokemonDB.userId == getCurrentUserId()) {
+                            Pokemon(
+                                id = document.id,
+                                userId = pokemonDB.userId,
+                                name = pokemonDB.name,
+                                tipo1 = pokemonDB.tipo1,
+                                tipo2 = pokemonDB.tipo2,
+                                idpersonaje = pokemonDB.idpersonaje
+                            )
+                        } else null
                     }
                 }
             }
